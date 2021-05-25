@@ -7,8 +7,7 @@ public class SurfaceManager : MonoBehaviour
 {
     public Camera mainCam;
 
-    [Header("Ligne Polygonale")] 
-    public float addPointDistance = 5.0f;
+    [Header("Ligne Polygonale")] public float addPointDistance = 5.0f;
     public int maxPointsLine = 4;
     public List<LignePolygonale> lignes = new List<LignePolygonale>();
     public LignePolygonale currentEditedLine = new LignePolygonale();
@@ -23,18 +22,18 @@ public class SurfaceManager : MonoBehaviour
 
     public List<CourbeDeChaikin> courbes = new List<CourbeDeChaikin>();
 
-    [Header("Coons")] 
-    public FacetteDeCoons facette;
+    [Header("Coons")] public FacetteDeCoons facette;
 
 
     private void Update()
     {
         if (lignes.Count >= 4 && facette.courbes.Count <= 0)
         {
+            UpdateCourbes();
             facette.ComputeFacette(courbes);
             return;
         }
-        
+
         if (Input.GetMouseButtonUp(0))
             AddPoint();
 
@@ -46,7 +45,7 @@ public class SurfaceManager : MonoBehaviour
             courbes.Add(CourbeDeChaikin.ComputeChaikin(ref currentEditedLine, uv, oneLessUV, iteration));
             currentEditedLine = new LignePolygonale();
         }
-        
+
         if (currentEditedLine.points.Count == maxPointsLine)
         {
             lignes.Add(currentEditedLine);
@@ -57,13 +56,87 @@ public class SurfaceManager : MonoBehaviour
     }
 
 
-    public void AddPoint()
+    private void AddPoint()
     {
         var mousePos = Input.mousePosition;
         mousePos.z = Camera.main.nearClipPlane;
         Vector3 p = mainCam.ScreenToWorldPoint(mousePos);
         p += (p - mainCam.transform.position).normalized * addPointDistance;
         currentEditedLine.AddPoint(p);
+    }
+
+    private void UpdateCourbes()
+    {
+        var lineCenter = Vector3.zero;
+        var courbeCenter = Vector3.zero;
+
+        var dir = Vector3.zero;
+
+        Debug.Break();
+
+        // Dir entre A et B
+        dir = courbes[1].points[0] - courbes[0].points[courbes[0].points.Count - 1];
+        for (int i = 0; i < courbes[0].points.Count; i++)
+        {
+            courbes[0].points[i] += dir;
+            courbes[2].points[i] += dir;
+            courbes[3].points[i] += dir;
+        }
+
+        // Dir entre B et C
+        dir = courbes[2].points[0] - courbes[1].points[courbes[1].points.Count - 1];
+        for (int i = 0; i < courbes[0].points.Count; i++)
+        {
+            courbes[0].points[i] += dir;
+            courbes[1].points[i] += dir;
+            courbes[3].points[i] += dir;
+        }
+
+        // dir entre C et D
+        dir = courbes[3].points[0] - courbes[2].points[courbes[2].points.Count - 1];
+        for (int i = 0; i < courbes[0].points.Count; i++)
+        {
+            courbes[0].points[i] += dir;
+            courbes[1].points[i] += dir;
+            courbes[2].points[i] += dir;
+        }
+
+        var ptsAD = courbes[0].points[0] + courbes[3].points[courbes[3].points.Count - 1];
+        ptsAD *= 0.5f;
+        courbes[0].points[0] = ptsAD;
+        courbes[3].points[courbes[3].points.Count - 1] = ptsAD;
+
+        for (int i = 0; i < courbes[0].points.Count; i++)
+        {
+            courbeCenter += courbes[0].points[i];
+            courbeCenter += courbes[1].points[i];
+            courbeCenter += courbes[2].points[i];
+            courbeCenter += courbes[3].points[i];
+        }
+
+        courbeCenter *= (1.0f / (courbes[0].points.Count * 4));
+
+        int total = 0;
+        for (int i = 0; i < lignes.Count; i++)
+        {
+            for (int j = 0; j < lignes[i].points.Count; j++)
+            {
+                lineCenter += lignes[i].points[j];
+                total++;
+            }
+        }
+
+        lineCenter *= (1.0f / (float) total);
+
+        dir = lineCenter - courbeCenter;
+        for (int i = 0; i < courbes[0].points.Count; i++)
+        {
+            courbes[0].points[i] += dir;
+            courbes[1].points[i] += dir;
+            courbes[2].points[i] += dir;
+            courbes[3].points[i] += dir;
+        }
+        
     }
 
     private void OnDrawGizmos()
@@ -73,7 +146,7 @@ public class SurfaceManager : MonoBehaviour
             Gizmos.color = Color.cyan;
             foreach (var p in currentEditedLine.points)
             {
-                Gizmos.DrawSphere(p, 0.1f);
+                Gizmos.DrawSphere(p, 0.05f);
             }
 
             for (int i = 0; i < currentEditedLine.points.Count - 1; i++)
@@ -89,7 +162,7 @@ public class SurfaceManager : MonoBehaviour
             {
                 foreach (var p in c.points)
                 {
-                    Gizmos.DrawSphere(p, 0.1f);
+                    Gizmos.DrawSphere(p, 0.05f);
                 }
 
                 for (int i = 0; i < c.points.Count - 1; i++)
@@ -106,7 +179,7 @@ public class SurfaceManager : MonoBehaviour
             {
                 foreach (var p in c.points)
                 {
-                    Gizmos.DrawSphere(p, 0.1f);
+                    Gizmos.DrawSphere(p, 0.05f);
                 }
 
                 for (int i = 0; i < c.points.Count - 1; i++)
@@ -123,7 +196,7 @@ public class SurfaceManager : MonoBehaviour
                 for (int j = 0; j < facette.facettePoints.GetLength(1); j++)
                 {
                     Gizmos.color = Color.yellow;
-                    Gizmos.DrawWireSphere(facette.facettePoints[i,j], 0.2f);
+                    Gizmos.DrawWireSphere(facette.facettePoints[i, j], 0.05f);
                 }
             }
         }
