@@ -7,9 +7,11 @@ public class SurfaceManager : MonoBehaviour
 {
     public Camera mainCam;
 
-    [Header("Ligne Polygonale")] public List<LignePolygonale> lignes = new List<LignePolygonale>();
-    public LignePolygonale currentEditedLine = new LignePolygonale();
+    [Header("Ligne Polygonale")] 
     public float addPointDistance = 5.0f;
+    public int maxPointsLine = 4;
+    public List<LignePolygonale> lignes = new List<LignePolygonale>();
+    public LignePolygonale currentEditedLine = new LignePolygonale();
 
     [Header("Chaikin")] public int iteration = 2;
     public Vector2 uv = new Vector2(0.33f, 0.33f);
@@ -21,19 +23,36 @@ public class SurfaceManager : MonoBehaviour
 
     public List<CourbeDeChaikin> courbes = new List<CourbeDeChaikin>();
 
-    [Header("Coons")] public FacetteDeCoons facette;
+    [Header("Coons")] 
+    public FacetteDeCoons facette;
 
 
     private void Update()
     {
+        if (lignes.Count >= 4 && facette.courbes.Count <= 0)
+        {
+            facette.ComputeFacette(courbes);
+            return;
+        }
+        
         if (Input.GetMouseButtonUp(0))
             AddPoint();
 
-        if (Input.GetKeyUp(KeyCode.O))
+        if (currentEditedLine.points.Count + 1 == maxPointsLine &&
+            lignes.Count == 3)
+        {
+            currentEditedLine.AddPoint(lignes[0].points[0]);
+            lignes.Add(currentEditedLine);
+            courbes.Add(CourbeDeChaikin.ComputeChaikin(ref currentEditedLine, uv, oneLessUV, iteration));
+            currentEditedLine = new LignePolygonale();
+        }
+        
+        if (currentEditedLine.points.Count == maxPointsLine)
         {
             lignes.Add(currentEditedLine);
             courbes.Add(CourbeDeChaikin.ComputeChaikin(ref currentEditedLine, uv, oneLessUV, iteration));
             currentEditedLine = new LignePolygonale();
+            currentEditedLine.AddPoint(lignes[lignes.Count - 1].points[maxPointsLine - 1]);
         }
     }
 
@@ -42,9 +61,7 @@ public class SurfaceManager : MonoBehaviour
     {
         var mousePos = Input.mousePosition;
         mousePos.z = Camera.main.nearClipPlane;
-        Debug.Log(mousePos + " mouse pos");
         Vector3 p = mainCam.ScreenToWorldPoint(mousePos);
-        Debug.Log(p + " in world spacce");
         p += (p - mainCam.transform.position).normalized * addPointDistance;
         currentEditedLine.AddPoint(p);
     }
@@ -95,6 +112,18 @@ public class SurfaceManager : MonoBehaviour
                 for (int i = 0; i < c.points.Count - 1; i++)
                 {
                     Gizmos.DrawLine(c.points[i], c.points[i + 1]);
+                }
+            }
+        }
+
+        if (facette.courbes.Count > 0)
+        {
+            for (int i = 0; i < facette.facettePoints.GetLength(0); i++)
+            {
+                for (int j = 0; j < facette.facettePoints.GetLength(1); j++)
+                {
+                    Gizmos.color = Color.yellow;
+                    Gizmos.DrawWireSphere(facette.facettePoints[i,j], 0.2f);
                 }
             }
         }

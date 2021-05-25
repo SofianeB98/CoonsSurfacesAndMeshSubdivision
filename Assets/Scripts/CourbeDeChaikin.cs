@@ -5,7 +5,7 @@ using UnityEngine;
 public class CourbeDeChaikin
 {
     public LignePolygonale refLignePolygonale;
-    public List<Vector3> points;
+    public List<Vector3> points = new List<Vector3>();
 
     public static CourbeDeChaikin ComputeChaikin(ref LignePolygonale line, Vector2 uv, float oneLessUV,
         int iteration = 2)

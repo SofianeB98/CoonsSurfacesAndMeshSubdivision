@@ -5,7 +5,7 @@ using UnityEngine;
 [System.Serializable]
 public class LignePolygonale
 {
-    public List<Vector3> points;
+    public List<Vector3> points = new List<Vector3>();
 
     public LignePolygonale()
     {
