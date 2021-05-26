@@ -17,7 +17,7 @@ public class FacetteDeCoons
     
     // Plan final
     public Vector3[,] facettePoints;
-    
+    public Mesh mesh;
     
     public void ComputeFacette(List<CourbeDeChaikin> c)
     {
@@ -86,6 +86,61 @@ public class FacetteDeCoons
                 facettePoints[i, j] = planAC.GetPointsAt(i, j) + planBD.GetPointsAt(j, i) - planFromLines.GetPointsAt(i,j);
             }
         }
+        
+        ComputeMesh();
+    }
+
+    private void ComputeMesh()
+    {
+        mesh = new Mesh();
+        Vector3[] vertices = new Vector3[this.facettePoints.GetLength(0) * this.facettePoints.GetLength(1)];
+        for (int i = 0; i < this.facettePoints.GetLength(0); i++)
+        {
+            for (int j = 0; j < this.facettePoints.GetLength(1); j++)
+            {
+                vertices[i * this.facettePoints.GetLength(0) + j] = facettePoints[i, j];
+            }
+        }
+        mesh.vertices = vertices;
+
+        int m = this.facettePoints.GetLength(0);
+        int p = this.facettePoints.GetLength(1);
+        
+        var triangles = new List<int>();
+        
+        // Triangle
+        for (int i = 0; i < m - 1; i++)
+        {
+            for (int j = 0; j < p - 1; j++)
+            {
+                int a = i * (p) + j;
+                int b = (i + 1) * (p) + j;
+                int c = (i + 1) * (p) + j + 1;
+
+                int d = i * (p) + j + 1;
+                
+                triangles.Add(a);
+                triangles.Add(c);
+                triangles.Add(b);
+                
+                triangles.Add(a);
+                triangles.Add(d);
+                triangles.Add(c);
+            }
+        }
+
+        mesh.triangles = triangles.ToArray();
+        
+        mesh.RecalculateNormals();
+        mesh.RecalculateTangents();
+        mesh.RecalculateBounds();
+        
+        GameObject go = new GameObject("test");
+        MeshFilter mf = go.AddComponent<MeshFilter>();
+        mf.sharedMesh = mesh;
+
+        MeshRenderer mr = go.AddComponent<MeshRenderer>();
+        mr.material = new Material(Shader.Find("Standard"));
     }
     
 }

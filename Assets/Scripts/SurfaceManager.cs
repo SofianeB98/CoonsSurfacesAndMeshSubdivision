@@ -5,7 +5,10 @@ using Random = UnityEngine.Random;
 
 public class SurfaceManager : MonoBehaviour
 {
-    public Camera mainCam;
+    [Header("Construction Helper")] public Camera mainCam;
+    public Transform creationCamPos = null;
+    public Transform finalCamPos = null;
+
 
     [Header("Ligne Polygonale")] public float addPointDistance = 5.0f;
     public int maxPointsLine = 4;
@@ -24,15 +27,29 @@ public class SurfaceManager : MonoBehaviour
 
     [Header("Coons")] public FacetteDeCoons facette;
 
+    private void Start()
+    {
+        this.mainCam.transform.position = this.creationCamPos.position;
+        this.mainCam.transform.rotation = this.creationCamPos.rotation;
+    }
 
     private void Update()
     {
         if (lignes.Count >= 4 && facette.courbes.Count <= 0)
         {
+            this.mainCam.transform.position = this.finalCamPos.position;
+            this.mainCam.transform.rotation = this.finalCamPos.rotation;
+
             UpdateCourbes();
+
             facette.ComputeFacette(courbes);
+
             return;
         }
+
+        if (lignes.Count >= 4)
+            return;
+
 
         if (Input.GetMouseButtonUp(0))
             AddPoint();
@@ -48,6 +65,15 @@ public class SurfaceManager : MonoBehaviour
 
         if (currentEditedLine.points.Count == maxPointsLine)
         {
+            var dirFirstToLastPts =
+                (currentEditedLine.points[maxPointsLine - 1] - currentEditedLine.points[0]).normalized;
+            float dot = Vector3.Dot(dirFirstToLastPts, this.mainCam.transform.right);
+
+            if (dot > 0.0f)
+                this.mainCam.transform.Rotate(Vector3.up, 90.0f);
+            else
+                this.mainCam.transform.Rotate(Vector3.up, -90.0f);
+
             lignes.Add(currentEditedLine);
             courbes.Add(CourbeDeChaikin.ComputeChaikin(ref currentEditedLine, uv, oneLessUV, iteration));
             currentEditedLine = new LignePolygonale();
@@ -59,7 +85,7 @@ public class SurfaceManager : MonoBehaviour
     private void AddPoint()
     {
         var mousePos = Input.mousePosition;
-        mousePos.z = Camera.main.nearClipPlane;
+        mousePos.z = mainCam.nearClipPlane;
         Vector3 p = mainCam.ScreenToWorldPoint(mousePos);
         p += (p - mainCam.transform.position).normalized * addPointDistance;
         currentEditedLine.AddPoint(p);
@@ -72,7 +98,6 @@ public class SurfaceManager : MonoBehaviour
 
         var dir = Vector3.zero;
 
-        Debug.Break();
 
         // Dir entre A et B
         dir = courbes[1].points[0] - courbes[0].points[courbes[0].points.Count - 1];
@@ -136,7 +161,6 @@ public class SurfaceManager : MonoBehaviour
             courbes[2].points[i] += dir;
             courbes[3].points[i] += dir;
         }
-        
     }
 
     private void OnDrawGizmos()
