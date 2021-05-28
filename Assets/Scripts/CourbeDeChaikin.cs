@@ -11,8 +11,8 @@ public class CourbeDeChaikin
         int iteration = 2)
     {
         CourbeDeChaikin cdc = new CourbeDeChaikin {refLignePolygonale = line};
-
-
+        
+        
         LignePolygonale copyLine = line;
         for (int i = 0; i < iteration; i++)
         {
@@ -31,6 +31,8 @@ public class CourbeDeChaikin
         }
 
         cdc.points = copyLine.points;
+        cdc.points.Insert(0,line.points[0]);
+        cdc.points.Add(line.points[line.points.Count - 1]);
 
         return cdc;
     }

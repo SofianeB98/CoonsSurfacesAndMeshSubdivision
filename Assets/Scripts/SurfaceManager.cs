@@ -40,7 +40,7 @@ public class SurfaceManager : MonoBehaviour
             this.mainCam.transform.position = this.finalCamPos.position;
             this.mainCam.transform.rotation = this.finalCamPos.rotation;
 
-            UpdateCourbes();
+            //UpdateCourbes();
 
             facette.ComputeFacette(courbes);
 
@@ -84,11 +84,18 @@ public class SurfaceManager : MonoBehaviour
 
     private void AddPoint()
     {
-        var mousePos = Input.mousePosition;
-        mousePos.z = mainCam.nearClipPlane;
-        Vector3 p = mainCam.ScreenToWorldPoint(mousePos);
-        p += (p - mainCam.transform.position).normalized * addPointDistance;
-        currentEditedLine.AddPoint(p);
+        Plane p = new Plane(mainCam.transform.forward * -1, mainCam.transform.position + mainCam.transform.forward * addPointDistance);
+        var ray = mainCam.ScreenPointToRay(Input.mousePosition);
+        if (p.Raycast(ray, out float e))
+        {
+            var points = ray.GetPoint(e);
+            currentEditedLine.AddPoint(points);
+        }
+        
+        // var mousePos = Input.mousePosition;
+        // mousePos.z = mainCam.nearClipPlane;
+        // Vector3 p = mainCam.ScreenToWorldPoint(mousePos);
+        // p += (p - mainCam.transform.position).normalized * addPointDistance;
     }
 
     private void UpdateCourbes()
@@ -163,6 +170,11 @@ public class SurfaceManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Quand on divise le 3e surface il faut diviser le segment selon les valeur U et V
+    /// afin d'avoir un truc homogène 
+    /// </summary>
+    
     private void OnDrawGizmos()
     {
         if (currentEditedLine.points.Count > 0)
