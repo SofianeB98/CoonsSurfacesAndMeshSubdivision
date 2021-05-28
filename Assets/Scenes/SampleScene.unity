@@ -332,12 +332,12 @@ MonoBehaviour:
   creationCamPos: {fileID: 1806948816}
   finalCamPos: {fileID: 974615663}
   addPointDistance: 2
-  maxPointsLine: 6
+  maxPointsLine: 4
   lignes: []
   currentEditedLine:
     points: []
-  iteration: 5
-  uv: {x: 0.33333, y: 0.33333}
+  iteration: 4
+  uv: {x: 0.25, y: 0.25}
   courbes: []
   facette:
     courbes: []
