@@ -15,8 +15,9 @@ namespace Subdivision
         {
             originalMesh = meshFilter.mesh;
             //this.subdiviser = new LoopSubdivisionSurface(SubdivisionUtils.Weld(meshFilter.mesh, float.Epsilon, meshFilter.mesh.bounds.size.x), iterations);
-            this.subdiviser = new CatmullClark(SubdivisionUtils.Weld(meshFilter.mesh, float.Epsilon, meshFilter.mesh.bounds.size.x), iterations);
-            //this.subdiviser = new CatmullClark(meshFilter.mesh, iterations);
+            //this.subdiviser = new CatmullClark(SubdivisionUtils.Weld(meshFilter.mesh, float.Epsilon, meshFilter.mesh.bounds.size.x), iterations);
+            this.subdiviser = new Bitterfly(SubdivisionUtils.Weld(meshFilter.mesh, float.Epsilon, meshFilter.mesh.bounds.size.x), iterations);
+           
             this.meshFilter.mesh = subdiviser.GetMesh();
 
         }
