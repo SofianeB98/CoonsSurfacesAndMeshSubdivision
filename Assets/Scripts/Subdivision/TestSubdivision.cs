@@ -14,7 +14,9 @@ namespace Subdivision
         public void Awake()
         {
             originalMesh = meshFilter.mesh;
-            this.subdiviser = new LoopSubdivisionSurface(SubdivisionUtils.Weld(meshFilter.mesh, float.Epsilon, meshFilter.mesh.bounds.size.x), iterations);
+            //this.subdiviser = new LoopSubdivisionSurface(SubdivisionUtils.Weld(meshFilter.mesh, float.Epsilon, meshFilter.mesh.bounds.size.x), iterations);
+            this.subdiviser = new CatmullClark(SubdivisionUtils.Weld(meshFilter.mesh, float.Epsilon, meshFilter.mesh.bounds.size.x), iterations);
+            //this.subdiviser = new CatmullClark(meshFilter.mesh, iterations);
             this.meshFilter.mesh = subdiviser.GetMesh();
 
         }
