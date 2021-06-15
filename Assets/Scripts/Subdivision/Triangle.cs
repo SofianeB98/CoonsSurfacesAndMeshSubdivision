@@ -9,6 +9,8 @@ namespace Subdivision
         public Vertex v0, v1, v2;
         public Edge e0, e1, e2;
 
+        private Vertex facePoint;
+        
         public Triangle(Vertex v0, Vertex v1, Vertex v2, Edge e0, Edge e1, Edge e2)
         {
             this.v0 = v0;
@@ -26,6 +28,13 @@ namespace Subdivision
             if (!e.Contains(v1)) 
                 return v1;
             return v2;
+        }
+
+        public Vertex ComputeFacePoint()
+        {
+            var average = (v0.position + v1.position + v2.position) / 3;
+            facePoint = new Vertex(average);
+            return facePoint;
         }
     }
 }

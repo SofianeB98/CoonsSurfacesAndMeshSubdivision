@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,8 +9,8 @@ namespace Subdivision
 {
     public class Model
     {
-        private List<Vertex> vertices;
-        private List<Edge> edges;
+        public List<Vertex> vertices;
+        public List<Edge> edges;
         public List<Triangle> triangles;
 
         public Model()
@@ -85,7 +86,7 @@ namespace Subdivision
 
             var e0 = GetEdge(v0, v1);
             var e1 = GetEdge(v1, v2);
-            var e2 = GetEdge(v0, v0);
+            var e2 = GetEdge(v2, v0);
             var f = new Triangle(v0, v1, v2, e0, e1, e2);
             this.triangles.Add(f);
             v0.AddTriangle(f);
