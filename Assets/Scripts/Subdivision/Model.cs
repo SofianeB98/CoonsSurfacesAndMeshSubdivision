@@ -75,6 +75,23 @@ namespace Subdivision
             return ne;
         }
 
+
+        public void AddVertex(Vector3 point)
+        {
+            this.vertices.Add(new Vertex(point, this.vertices.Count));
+        }
+
+        public Edge AddEdges(Vertex v1, Vertex v2)
+        {
+            Edge edge = new Edge(v1, v2);
+            edges.Add(edge);
+            
+            v1.edges.Add(edge);
+            v2.edges.Add(edge);
+
+            return edge;
+        }
+        
         public void AddTriangle(Vertex v0, Vertex v1, Vertex v2)
         {
             if(!vertices.Contains(v0))
@@ -88,7 +105,9 @@ namespace Subdivision
             var e1 = GetEdge(v1, v2);
             var e2 = GetEdge(v2, v0);
             var f = new Triangle(v0, v1, v2, e0, e1, e2);
+            
             this.triangles.Add(f);
+            
             v0.AddTriangle(f);
             v1.AddTriangle(f);
             v2.AddTriangle(f);

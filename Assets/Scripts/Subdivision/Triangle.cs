@@ -30,6 +30,20 @@ namespace Subdivision
             return v2;
         }
 
+        public IEnumerable<Vertex> GetVertices()
+        {
+            yield return v0;
+            yield return v1;
+            yield return v2;
+        }
+        
+        public IEnumerable<Edge> GetEdges()
+        {
+            yield return e0;
+            yield return e1;
+            yield return e2;
+        }
+
         public Vertex ComputeFacePoint()
         {
             var average = (v0.position + v1.position + v2.position) / 3;
